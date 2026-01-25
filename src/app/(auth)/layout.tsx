@@ -1,3 +1,4 @@
+// Autho Layout page
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen w-full bg-slate-900 text-white flex items-center justify-center">
