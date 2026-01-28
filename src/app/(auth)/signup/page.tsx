@@ -1,58 +1,64 @@
-"use client";
+'use client';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function SignUp() {
-  const [symbol, setSymbol] = useState('');
-  const [faction, setFaction] = useState('COSMIC'); // Default faction
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const response = await fetch('https://api.spacetraders.io/v2/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol, faction }),
+    setLoading(true);
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
     });
 
-    const result = await response.json();
-
-    if (result.data) {
-      const token = result.data.token;
-      // In a real app, save this to a Cookie or Database. 
-      // For now, let's just alert it so you don't lose it.
-      alert(`Agent Created! SAVE THIS TOKEN: ${token}`);
-      localStorage.setItem('spacetraders_token', token);
-      window.location.href = '/dashboard';
+    if (error) {
+      alert(error.message);
     } else {
-      alert(`Error: ${result.error.message}`);
+      alert('Account created!');
+      window.location.href = '/';
     }
+    setLoading(false);
   };
 
   return (
-    <div className="p-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Register New Agent</h1>
-      <form onSubmit={handleRegister} className="flex flex-col gap-4">
-        <input 
-          type="text" 
-          placeholder="Callsign (3-14 characters)" 
-          className="border p-2 text-black"
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-          required 
+    <div className='p-8 max-w-sm mx-auto'>
+      <h1 className='text-2xl font-bold mb-6'>Create Account</h1>
+      <form onSubmit={handleSignUp} className='flex flex-col gap-4'>
+        <input
+          type='email'
+          placeholder='Email'
+          className='border p-2 text-black bg-white rounded'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
-        <select 
-          className="border p-2 text-black"
-          value={faction}
-          onChange={(e) => setFaction(e.target.value)}
+        <input
+          type='password'
+          placeholder='Password'
+          className='border p-2 text-black bg-white rounded'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button
+          type='submit'
+          disabled={loading}
+          className='bg-blue-600 text-white p-2 rounded font-bold disabled:bg-gray-400'
         >
-          <option value="COSMIC">Cosmic</option>
-          <option value="VOID">Void</option>
-          <option value="GALACTIC">Galactic</option>
-        </select>
-        <button type="submit" className="bg-blue-600 text-white p-2 rounded">
-          Initialize Agent
+          {loading ? 'Creating...' : 'Sign Up'}
         </button>
       </form>
+      <p className='mt-4 text-sm'>
+        Already have an account?{' '}
+        <a href='/login' className='text-blue-500'>
+          Login
+        </a>
+      </p>
     </div>
   );
 }
